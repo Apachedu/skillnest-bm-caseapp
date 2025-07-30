@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/case/:id", "destination": "/" }
+  ]
+}
