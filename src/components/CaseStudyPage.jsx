@@ -41,28 +41,28 @@ const CaseStudyPage = () => {
         <strong>Topic:</strong> {caseStudy.topic} | <strong>Level:</strong> {caseStudy.level} | <strong>Command Term:</strong> {caseStudy.commandTerm}
       </p>
 
-      <div className="mt-4 text-gray-700">
+      <div className="mt-4 text-gray-700 whitespace-pre-wrap">
         <p>{caseStudy.caseText}</p>
       </div>
 
       <div className="mt-6 border-t pt-4">
         <h2 className="font-semibold text-gray-800">💡 Model Answer</h2>
-        <p className="mt-2 text-gray-700">{caseStudy.modelAnswer}</p>
+        <p className="mt-2 text-gray-700 whitespace-pre-wrap">{caseStudy.modelAnswer}</p>
       </div>
 
       <div className="mt-6">
         <h2 className="font-semibold text-gray-800">🧠 TOK Connection</h2>
-        <p className="text-gray-700 italic">{caseStudy.TOK}</p>
+        <p className="text-gray-700 italic whitespace-pre-wrap">{caseStudy.TOK}</p>
       </div>
 
       <div className="mt-4">
         <h2 className="font-semibold text-gray-800">📊 IA Idea</h2>
-        <p className="text-gray-700">{caseStudy.IA}</p>
+        <p className="text-gray-700 whitespace-pre-wrap">{caseStudy.IA}</p>
       </div>
 
       <div className="mt-4">
         <h2 className="font-semibold text-gray-800">📘 EE Exploration</h2>
-        <p className="text-gray-700">{caseStudy.EE}</p>
+        <p className="text-gray-700 whitespace-pre-wrap">{caseStudy.EE}</p>
       </div>
     </div>
   );
