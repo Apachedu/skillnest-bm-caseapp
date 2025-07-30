@@ -6,8 +6,21 @@ import { doc, getDoc } from 'firebase/firestore';
 const CaseStudyPage = () => {
   const { id } = useParams();
   const [caseStudy, setCaseStudy] = useState(null);
+  const [responses, setResponses] = useState({});
   const [loading, setLoading] = useState(true);
 
+  // Load responses from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(`bm-responses-${id}`);
+    if (saved) setResponses(JSON.parse(saved));
+  }, [id]);
+
+  // Save to localStorage
+  useEffect(() => {
+    localStorage.setItem(`bm-responses-${id}`, JSON.stringify(responses));
+  }, [responses, id]);
+
+  // Fetch case study
   useEffect(() => {
     const fetchCase = async () => {
       try {
@@ -41,28 +54,72 @@ const CaseStudyPage = () => {
         <strong>Topic:</strong> {caseStudy.topic} | <strong>Level:</strong> {caseStudy.level} | <strong>Command Term:</strong> {caseStudy.commandTerm}
       </p>
 
-      <div className="mt-4 text-gray-700 whitespace-pre-wrap">
-        <p>{caseStudy.caseText}</p>
+      {/* Case Text */}
+      <div className="mt-4 space-y-3 text-gray-800">
+        {Array.isArray(caseStudy.caseText) && caseStudy.caseText.map((para, idx) => (
+          <p key={idx}>{para}</p>
+        ))}
       </div>
 
-      <div className="mt-6 border-t pt-4">
-        <h2 className="font-semibold text-gray-800">💡 Model Answer</h2>
-        <p className="mt-2 text-gray-700 whitespace-pre-wrap">{caseStudy.modelAnswer}</p>
-      </div>
+      {/* Data Table */}
+      {Array.isArray(caseStudy.dataTable) && caseStudy.dataTable.length > 1 && (
+        <div className="mt-6">
+          <h2 className="font-semibold text-gray-800 mb-2">📊 Data Table</h2>
+          <table className="min-w-full border border-gray-300 text-sm">
+            <tbody>
+              {caseStudy.dataTable.map((row, i) => (
+                <tr key={i}>
+                  {row.map((cell, j) => (
+                    <td key={j} className="border px-3 py-2">{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-      <div className="mt-6">
-        <h2 className="font-semibold text-gray-800">🧠 TOK Connection</h2>
-        <p className="text-gray-700 italic whitespace-pre-wrap">{caseStudy.TOK}</p>
-      </div>
+      {/* Questions */}
+      {Array.isArray(caseStudy.questions) && (
+        <div className="mt-6 space-y-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">❓ Questions</h2>
+          {caseStudy.questions.map((question, idx) => (
+            <div key={idx} className="bg-gray-50 p-3 rounded border border-gray-200">
+              <p className="text-gray-800 font-medium mb-2">{idx + 1}. {question}</p>
+              <div className="min-h-[100px] border border-dashed border-gray-400 p-3 rounded text-gray-500 italic">
+                Your answer here...
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
-      <div className="mt-4">
-        <h2 className="font-semibold text-gray-800">📊 IA Idea</h2>
-        <p className="text-gray-700 whitespace-pre-wrap">{caseStudy.IA}</p>
-      </div>
-
-      <div className="mt-4">
-        <h2 className="font-semibold text-gray-800">📘 EE Exploration</h2>
-        <p className="text-gray-700 whitespace-pre-wrap">{caseStudy.EE}</p>
+      {/* Extras */}
+      <div className="mt-8 space-y-4">
+        {caseStudy.modelAnswer && (
+          <details className="border rounded p-3">
+            <summary className="cursor-pointer font-semibold text-blue-700">💡 Model Answer</summary>
+            <p className="mt-2 text-gray-700">{caseStudy.modelAnswer}</p>
+          </details>
+        )}
+        {caseStudy.TOK && (
+          <details className="border rounded p-3">
+            <summary className="cursor-pointer font-semibold text-purple-700">🧠 TOK Connection</summary>
+            <p className="mt-2 text-gray-700 italic">{caseStudy.TOK}</p>
+          </details>
+        )}
+        {caseStudy.IA && (
+          <details className="border rounded p-3">
+            <summary className="cursor-pointer font-semibold text-pink-700">📊 IA Idea</summary>
+            <p className="mt-2 text-gray-700">{caseStudy.IA}</p>
+          </details>
+        )}
+        {caseStudy.EE && (
+          <details className="border rounded p-3">
+            <summary className="cursor-pointer font-semibold text-green-700">📘 EE Exploration</summary>
+            <p className="mt-2 text-gray-700">{caseStudy.EE}</p>
+          </details>
+        )}
       </div>
     </div>
   );
