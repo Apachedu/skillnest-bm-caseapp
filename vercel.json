@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/case/:id", "destination": "/" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }
+
