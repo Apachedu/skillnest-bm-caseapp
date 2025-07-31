@@ -41,27 +41,36 @@ const CaseStudyPage = () => {
     fetchCase();
   }, [id]);
 
-  const feedbackMessage = (score) => {
+  const feedbackMessage = (score, paperType) => {
+    let message = '';
     switch (score) {
       case 7:
-        return "Outstanding analysis and application to the real-world context.";
+        message = 'Outstanding analysis and application to the real-world context.';
+        break;
       case 6:
-        return "Excellent depth and clarity in explanation.";
+        message = 'Excellent depth and clarity in explanation.';
+        break;
       case 5:
-        return "Good understanding with minor elaboration needed.";
+        message = 'Good understanding with minor elaboration needed.';
+        break;
       case 4:
-        return "Satisfactory response, but more depth is expected.";
+        message = 'Satisfactory response, but more depth is expected.';
+        break;
       case 3:
-        return "Some understanding, more real-world linkages required.";
+        message = 'Some understanding, more real-world linkages required.';
+        break;
       case 2:
-        return "Basic attempt. Focus on command term and structure.";
+        message = 'Basic attempt. Focus on command term and structure.';
+        break;
       default:
-        return "Insufficient response. Try expanding and adding examples.";
+        message = 'Insufficient response. Try expanding and adding examples.';
     }
+    return `${message} (Based on ${paperType})`;
   };
 
   const handleChange = (e, index) => {
     setResponses({ ...responses, [index]: e.target.value });
+    setSubmitted({ ...submitted, [index]: false });
   };
 
   const handleSubmit = (index) => {
@@ -76,7 +85,7 @@ const CaseStudyPage = () => {
 
     setBandScores(prev => ({ ...prev, [index]: score }));
     setSubmitted(prev => ({ ...prev, [index]: true }));
-    setFeedback(prev => ({ ...prev, [index]: feedbackMessage(score) }));
+    setFeedback(prev => ({ ...prev, [index]: feedbackMessage(score, caseStudy.paperType || 'Paper 1') }));
   };
 
   if (loading) return <p className="p-4 text-gray-600">Loading case study...</p>;
@@ -123,14 +132,11 @@ const CaseStudyPage = () => {
                 rows="6"
                 value={responses[i] || ''}
                 onChange={(e) => handleChange(e, i)}
-                disabled={submitted[i]}
               />
-              {!submitted[i] && (
-                <button
-                  className="mt-2 px-4 py-1 bg-green-600 text-white rounded text-sm"
-                  onClick={() => handleSubmit(i)}
-                >Submit</button>
-              )}
+              <button
+                className="mt-2 px-4 py-1 bg-green-600 text-white rounded text-sm"
+                onClick={() => handleSubmit(i)}
+              >Submit</button>
               {submitted[i] && (
                 <div className="text-sm mt-1 text-green-700">
                   ✅ Answer saved! Estimated Band Score: {bandScores[i] || 1}/7<br />
@@ -192,3 +198,5 @@ const CaseStudyPage = () => {
 };
 
 export default CaseStudyPage;
+
+        
