@@ -13,7 +13,6 @@ const CaseStudyPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Clear saved responses on load (for development reset)
     localStorage.removeItem(`responses-${id}`);
   }, [id]);
 
@@ -84,13 +83,6 @@ const CaseStudyPage = () => {
     else if (answer.length > 50) score = 2;
 
     const paperType = caseStudy?.paperType || 'Paper 1';
-
-    console.log({
-      answerLength: answer.length,
-      score,
-      paperType,
-      feedback: feedbackMessage(score, paperType)
-    });
 
     setBandScores(prev => ({ ...prev, [index]: score }));
     setSubmitted(prev => ({ ...prev, [index]: true }));
