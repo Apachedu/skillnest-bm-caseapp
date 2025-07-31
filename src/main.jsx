@@ -1,4 +1,3 @@
-// src/main.jsx
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -12,7 +11,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/case/:id" element={<CaseStudyPage />} />
-        <Route path="/" element={<DashboardPage />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
