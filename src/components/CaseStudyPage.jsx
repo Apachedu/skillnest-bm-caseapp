@@ -8,20 +8,19 @@ const CaseStudyPage = () => {
   const [caseStudy, setCaseStudy] = useState(null);
   const [responses, setResponses] = useState({});
   const [submitted, setSubmitted] = useState({});
+  const [bandScores, setBandScores] = useState({});
+  const [feedback, setFeedback] = useState({});
   const [loading, setLoading] = useState(true);
 
-  // Load saved responses
   useEffect(() => {
     const saved = localStorage.getItem(`responses-${id}`);
     if (saved) setResponses(JSON.parse(saved));
   }, [id]);
 
-  // Save responses to localStorage
   useEffect(() => {
     localStorage.setItem(`responses-${id}`, JSON.stringify(responses));
   }, [responses, id]);
 
-  // Fetch case study from Firestore
   useEffect(() => {
     const fetchCase = async () => {
       try {
@@ -42,12 +41,42 @@ const CaseStudyPage = () => {
     fetchCase();
   }, [id]);
 
+  const feedbackMessage = (score) => {
+    switch (score) {
+      case 7:
+        return "Outstanding analysis and application to the real-world context.";
+      case 6:
+        return "Excellent depth and clarity in explanation.";
+      case 5:
+        return "Good understanding with minor elaboration needed.";
+      case 4:
+        return "Satisfactory response, but more depth is expected.";
+      case 3:
+        return "Some understanding, more real-world linkages required.";
+      case 2:
+        return "Basic attempt. Focus on command term and structure.";
+      default:
+        return "Insufficient response. Try expanding and adding examples.";
+    }
+  };
+
   const handleChange = (e, index) => {
     setResponses({ ...responses, [index]: e.target.value });
   };
 
   const handleSubmit = (index) => {
-    setSubmitted((prev) => ({ ...prev, [index]: true }));
+    const answer = responses[index] || '';
+    let score = 1;
+    if (answer.length > 600) score = 7;
+    else if (answer.length > 450) score = 6;
+    else if (answer.length > 350) score = 5;
+    else if (answer.length > 250) score = 4;
+    else if (answer.length > 150) score = 3;
+    else if (answer.length > 50) score = 2;
+
+    setBandScores(prev => ({ ...prev, [index]: score }));
+    setSubmitted(prev => ({ ...prev, [index]: true }));
+    setFeedback(prev => ({ ...prev, [index]: feedbackMessage(score) }));
   };
 
   if (loading) return <p className="p-4 text-gray-600">Loading case study...</p>;
@@ -62,12 +91,10 @@ const CaseStudyPage = () => {
         <strong>Topic:</strong> {caseStudy.topic} | <strong>Command:</strong> {caseStudy.commandTerm} | <strong>Paper:</strong> {caseStudy.paperType}
       </p>
 
-      {/* Case Text */}
       <div className="space-y-3">
         {Array.isArray(caseStudy.caseText) && caseStudy.caseText.map((p, i) => <p key={i}>{p}</p>)}
       </div>
 
-      {/* Data Table */}
       {Array.isArray(caseStudy.dataTable) && caseStudy.dataTable.length > 1 && (
         <div className="mt-6">
           <h2 className="font-semibold text-gray-800 mb-2">📊 Data Table</h2>
@@ -85,7 +112,6 @@ const CaseStudyPage = () => {
         </div>
       )}
 
-      {/* Questions */}
       {Array.isArray(caseStudy.questions) && (
         <div className="mt-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-3">❓ Questions</h2>
@@ -94,21 +120,28 @@ const CaseStudyPage = () => {
               <p className="font-medium mb-2">{i + 1}. {q}</p>
               <textarea
                 className="w-full border border-gray-300 rounded p-2 text-sm"
-                rows="4"
+                rows="6"
                 value={responses[i] || ''}
                 onChange={(e) => handleChange(e, i)}
+                disabled={submitted[i]}
               />
-              <button
-                className="mt-2 px-4 py-1 bg-green-600 text-white rounded text-sm"
-                onClick={() => handleSubmit(i)}
-              >Submit</button>
-              {submitted[i] && <p className="text-green-600 text-sm mt-1">Answer saved ✅</p>}
+              {!submitted[i] && (
+                <button
+                  className="mt-2 px-4 py-1 bg-green-600 text-white rounded text-sm"
+                  onClick={() => handleSubmit(i)}
+                >Submit</button>
+              )}
+              {submitted[i] && (
+                <div className="text-sm mt-1 text-green-700">
+                  ✅ Answer saved! Estimated Band Score: {bandScores[i] || 1}/7<br />
+                  💬 Feedback: {feedback[i]}
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
 
-      {/* Other Sections */}
       <div className="mt-6 space-y-3">
         {caseStudy.modelAnswer && (
           <details className="border p-3 rounded">
@@ -148,7 +181,9 @@ const CaseStudyPage = () => {
         {caseStudy.resources && (
           <details className="border p-3 rounded">
             <summary className="cursor-pointer font-semibold text-gray-700">🔗 Additional Resources</summary>
-            <p className="mt-2 text-blue-600 underline"><a href={caseStudy.resources} target="_blank" rel="noopener noreferrer">View Resource</a></p>
+            <p className="mt-2 text-blue-600 underline">
+              <a href={caseStudy.resources} target="_blank" rel="noopener noreferrer">View Resource</a>
+            </p>
           </details>
         )}
       </div>
@@ -157,4 +192,3 @@ const CaseStudyPage = () => {
 };
 
 export default CaseStudyPage;
-
