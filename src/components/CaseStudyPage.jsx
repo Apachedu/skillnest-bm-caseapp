@@ -13,8 +13,8 @@ const CaseStudyPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem(`responses-${id}`);
-    if (saved) setResponses(JSON.parse(saved));
+    // Clear saved responses on load (for development reset)
+    localStorage.removeItem(`responses-${id}`);
   }, [id]);
 
   useEffect(() => {
@@ -83,9 +83,18 @@ const CaseStudyPage = () => {
     else if (answer.length > 150) score = 3;
     else if (answer.length > 50) score = 2;
 
+    const paperType = caseStudy?.paperType || 'Paper 1';
+
+    console.log({
+      answerLength: answer.length,
+      score,
+      paperType,
+      feedback: feedbackMessage(score, paperType)
+    });
+
     setBandScores(prev => ({ ...prev, [index]: score }));
     setSubmitted(prev => ({ ...prev, [index]: true }));
-    setFeedback(prev => ({ ...prev, [index]: feedbackMessage(score, caseStudy.paperType || 'Paper 1') }));
+    setFeedback(prev => ({ ...prev, [index]: feedbackMessage(score, paperType) }));
   };
 
   if (loading) return <p className="p-4 text-gray-600">Loading case study...</p>;
@@ -137,8 +146,8 @@ const CaseStudyPage = () => {
                 className="mt-2 px-4 py-1 bg-green-600 text-white rounded text-sm"
                 onClick={() => handleSubmit(i)}
               >Submit</button>
-              {submitted[i] && (
-                <div className="text-sm mt-1 text-green-700">
+              {(submitted[i] || bandScores[i]) && (
+                <div className="text-sm mt-1 text-green-700 border border-red-500 p-2">
                   ✅ Answer saved! Estimated Band Score: {bandScores[i] || 1}/7<br />
                   💬 Feedback: {feedback[i]}
                 </div>
@@ -198,5 +207,3 @@ const CaseStudyPage = () => {
 };
 
 export default CaseStudyPage;
-
-        
