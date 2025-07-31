@@ -1,7 +1,7 @@
 import React from 'react';
 import CaseStudyList from './components/CaseStudyList';
 import logo from './assets/logo.png';
-
+import DashboardPage from './components/DashboardPage';
 const App = () => (
   <main className="p-6 max-w-6xl mx-auto">
     <div className="flex items-center gap-4 mb-6">
