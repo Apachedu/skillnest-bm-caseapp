@@ -41,30 +41,15 @@ const CaseStudyPage = () => {
   }, [id]);
 
   const feedbackMessage = (score, paperType) => {
-    let message = '';
-    switch (score) {
-      case 7:
-        message = 'Outstanding analysis and application to the real-world context.';
-        break;
-      case 6:
-        message = 'Excellent depth and clarity in explanation.';
-        break;
-      case 5:
-        message = 'Good understanding with minor elaboration needed.';
-        break;
-      case 4:
-        message = 'Satisfactory response, but more depth is expected.';
-        break;
-      case 3:
-        message = 'Some understanding, more real-world linkages required.';
-        break;
-      case 2:
-        message = 'Basic attempt. Focus on command term and structure.';
-        break;
-      default:
-        message = 'Insufficient response. Try expanding and adding examples.';
-    }
-    return `${message} (Based on ${paperType})`;
+    const feedbackMap = {
+      7: 'Outstanding analysis and application to the real-world context.',
+      6: 'Excellent depth and clarity in explanation.',
+      5: 'Good understanding with minor elaboration needed.',
+      4: 'Satisfactory response, but more depth is expected.',
+      3: 'Some understanding, more real-world linkages required.',
+      2: 'Basic attempt. Focus on command term and structure.',
+    };
+    return `${feedbackMap[score] || 'Insufficient response. Try expanding and adding examples.'} (Based on ${paperType})`;
   };
 
   const handleChange = (e, index) => {
@@ -74,19 +59,25 @@ const CaseStudyPage = () => {
 
   const handleSubmit = (index) => {
     const answer = responses[index] || '';
+    const wordCount = answer.trim().split(/\s+/).length;
     let score = 1;
-    if (answer.length > 600) score = 7;
-    else if (answer.length > 450) score = 6;
-    else if (answer.length > 350) score = 5;
-    else if (answer.length > 250) score = 4;
-    else if (answer.length > 150) score = 3;
-    else if (answer.length > 50) score = 2;
+    if (wordCount > 300) score = 7;
+    else if (wordCount > 250) score = 6;
+    else if (wordCount > 200) score = 5;
+    else if (wordCount > 150) score = 4;
+    else if (wordCount > 100) score = 3;
+    else if (wordCount > 50) score = 2;
 
     const paperType = caseStudy?.paperType || 'Paper 1';
+    setBandScores((prev) => ({ ...prev, [index]: score }));
+    setSubmitted((prev) => ({ ...prev, [index]: true }));
+    setFeedback((prev) => ({ ...prev, [index]: feedbackMessage(score, paperType) }));
+  };
 
-    setBandScores(prev => ({ ...prev, [index]: score }));
-    setSubmitted(prev => ({ ...prev, [index]: true }));
-    setFeedback(prev => ({ ...prev, [index]: feedbackMessage(score, paperType) }));
+  const renderField = (field) => {
+    if (!field) return null;
+    const content = Array.isArray(field) ? field.join('\n') : field;
+    return <p className="mt-2 whitespace-pre-line text-gray-700">{content}</p>;
   };
 
   if (loading) return <p className="p-4 text-gray-600">Loading case study...</p>;
@@ -153,44 +144,52 @@ const CaseStudyPage = () => {
         {caseStudy.modelAnswer && (
           <details className="border p-3 rounded">
             <summary className="cursor-pointer font-semibold text-blue-600">💡 Model Answer</summary>
-            <p className="mt-2 text-gray-700">{caseStudy.modelAnswer}</p>
+            {renderField(caseStudy.modelAnswer)}
           </details>
         )}
 
         {caseStudy.toolkit && (
           <details className="border p-3 rounded">
             <summary className="cursor-pointer font-semibold text-yellow-700">🧰 Toolkit</summary>
-            <p className="mt-2 text-gray-700">{caseStudy.toolkit}</p>
+            {renderField(caseStudy.toolkit)}
           </details>
         )}
 
         {caseStudy.TOK && (
           <details className="border p-3 rounded">
             <summary className="cursor-pointer font-semibold text-purple-700">🧠 TOK Connection</summary>
-            <p className="mt-2 italic text-gray-700">{caseStudy.TOK}</p>
+            {renderField(caseStudy.TOK)}
           </details>
         )}
 
         {caseStudy.IA && (
           <details className="border p-3 rounded">
             <summary className="cursor-pointer font-semibold text-pink-700">📊 IA Idea</summary>
-            <p className="mt-2 text-gray-700">{caseStudy.IA}</p>
+            {renderField(caseStudy.IA)}
           </details>
         )}
 
         {caseStudy.EE && (
           <details className="border p-3 rounded">
             <summary className="cursor-pointer font-semibold text-green-700">📘 EE Exploration</summary>
-            <p className="mt-2 text-gray-700">{caseStudy.EE}</p>
+            {renderField(caseStudy.EE)}
           </details>
         )}
 
         {caseStudy.resources && (
           <details className="border p-3 rounded">
             <summary className="cursor-pointer font-semibold text-gray-700">🔗 Additional Resources</summary>
-            <p className="mt-2 text-blue-600 underline">
-              <a href={caseStudy.resources} target="_blank" rel="noopener noreferrer">View Resource</a>
-            </p>
+            {Array.isArray(caseStudy.resources) ? (
+              <ul className="list-disc ml-5">
+                {caseStudy.resources.map((link, i) => (
+                  <li key={i}><a href={link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{link}</a></li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-2 text-blue-600 underline">
+                <a href={caseStudy.resources} target="_blank" rel="noopener noreferrer">View Resource</a>
+              </p>
+            )}
           </details>
         )}
       </div>
