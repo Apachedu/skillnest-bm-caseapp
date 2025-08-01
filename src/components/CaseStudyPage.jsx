@@ -1,200 +1,116 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import db from '../firebase/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+// ✅ Let's fix this properly — permanent, professional, production-ready.
+// 📁 File: /src/components/CaseStudyPage.jsx
 
-const CaseStudyPage = () => {
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { caseStudies } from '../data/caseStudies.js';
+
+const TABS = ['Overview', 'Data', 'Questions'];
+
+export default function CaseStudyPage() {
   const { id } = useParams();
-  const [caseStudy, setCaseStudy] = useState(null);
+  const study = caseStudies.find((s) => s.id === id);
+
+  const [activeTab, setActiveTab] = useState('Overview');
   const [responses, setResponses] = useState({});
   const [submitted, setSubmitted] = useState({});
-  const [bandScores, setBandScores] = useState({});
-  const [feedback, setFeedback] = useState({});
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    localStorage.removeItem (`responses-${id}`);
-  }, [id]);
+  if (!study) return <div className="p-4">Case study not found.</div>;
 
-  useEffect(() => {
-    localStorage.setItem(`responses-${id}`, JSON.stringify(responses));
-  }, [responses, id]);
-
-  useEffect(() => {
-    const fetchCase = async () => {
-      try {
-        const docRef = doc(db, 'caseStudies', id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setCaseStudy(docSnap.data());
-        } else {
-          setCaseStudy(null);
-        }
-      } catch (err) {
-        console.error('Error fetching case:', err);
-        setCaseStudy(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCase();
-  }, [id]);
-
-  const feedbackMessage = (score, paperType) => {
-    const feedbackMap = {
-      7: 'Outstanding analysis and application to the real-world context.',
-      6: 'Excellent depth and clarity in explanation.',
-      5: 'Good understanding with minor elaboration needed.',
-      4: 'Satisfactory response, but more depth is expected.',
-      3: 'Some understanding, more real-world linkages required.',
-      2: 'Basic attempt. Focus on command term and structure.',
-    };
-    return `${feedbackMap[score] || 'Insufficient response. Try expanding and adding examples.'} (Based on ${paperType})`;
+  const handleChange = (e, questionIndex) => {
+    setResponses({ ...responses, [questionIndex]: e.target.value });
   };
 
-  const handleChange = (e, index) => {
-    setResponses({ ...responses, [index]: e.target.value });
-    setSubmitted({ ...submitted, [index]: false });
+  const handleSubmit = (questionIndex) => {
+    setSubmitted({ ...submitted, [questionIndex]: true });
   };
-
-  const handleSubmit = (index) => {
-    const answer = responses[index] || '';
-    const wordCount = answer.trim().split(/\s+/).length;
-    let score = 1;
-    if (wordCount > 300) score = 7;
-    else if (wordCount > 250) score = 6;
-    else if (wordCount > 200) score = 5;
-    else if (wordCount > 150) score = 4;
-    else if (wordCount > 100) score = 3;
-    else if (wordCount > 50) score = 2;
-
-    const paperType = caseStudy?.paperType || 'Paper 1';
-    setBandScores((prev) => ({ ...prev, [index]: score }));
-    setSubmitted((prev) => ({ ...prev, [index]: true }));
-    setFeedback((prev) => ({ ...prev, [index]: feedbackMessage(score, paperType) }));
-  };
-
-  const renderField = (field) => {
-    if (!field) return null;
-    const content = Array.isArray(field) ? field.join('\n') : field;
-    return <p className="mt-2 whitespace-pre-line text-gray-700">{content}</p>;
-  };
-
-  if (loading) return <p className="p-4 text-gray-600">Loading case study...</p>;
-  if (!caseStudy) return <p className="p-4 text-red-500">Case Study not found.</p>;
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg">
-      <Link to="/" className="text-blue-500 underline text-sm">← Back to Dashboard</Link>
-
-      <h1 className="text-2xl font-bold text-gray-800 mt-4">{caseStudy.title}</h1>
-      <p className="text-sm text-gray-500 mb-4">
-        <strong>Topic:</strong> {caseStudy.topic} | <strong>Command:</strong> {caseStudy.commandTerm} | <strong>Paper:</strong> {caseStudy.paperType}
-      </p>
-
-      <div className="space-y-3">
-        {Array.isArray(caseStudy.caseText) && caseStudy.caseText.map((p, i) => <p key={i}>{p}</p>)}
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4">{study.title}</h1>
+      <div className="flex gap-4 mb-4">
+        {TABS.map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 rounded border ${
+              activeTab === tab
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-blue-600 border-blue-600'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
 
-      {Array.isArray(caseStudy.dataTable) && caseStudy.dataTable.length > 1 && (
-        <div className="mt-6">
-          <h2 className="font-semibold text-gray-800 mb-2">📊 Data Table</h2>
-          <table className="min-w-full border border-gray-300 text-sm">
-            <tbody>
-              {caseStudy.dataTable.map((row, i) => (
-                <tr key={i}>
-                  {row.split(',').map((cell, j) => (
-                    <td key={j} className="border px-3 py-2">{cell}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {activeTab === 'Overview' && (
+        <div className="prose max-w-none">
+          {study.caseText.map((para, i) => (
+            <p key={i}>{para}</p>
+          ))}
         </div>
       )}
 
-      {Array.isArray(caseStudy.questions) && (
-        <div className="mt-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-3">❓ Questions</h2>
-          {caseStudy.questions.map((q, i) => (
-            <div key={i} className="mb-5">
-              <p className="font-medium mb-2">{i + 1}. {q}</p>
+      {activeTab === 'Data' && (
+        <table className="w-full table-auto border border-gray-300">
+          <thead>
+            <tr>
+              {study.dataTable[0].map((col, i) => (
+                <th key={i} className="border px-4 py-2 bg-gray-100">
+                  {col}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {study.dataTable.slice(1).map((row, i) => (
+              <tr key={i}>
+                {row.map((cell, j) => (
+                  <td key={j} className="border px-4 py-2">
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {activeTab === 'Questions' && (
+        <div className="space-y-6">
+          {study.questions.map((q, i) => (
+            <div key={i} className="border p-4 rounded shadow-sm">
+              <p className="font-semibold mb-2">Q{i + 1}. {q}</p>
               <textarea
-                className="w-full border border-gray-300 rounded p-2 text-sm"
-                rows="6"
+                className="w-full border rounded p-2"
+                rows={4}
                 value={responses[i] || ''}
                 onChange={(e) => handleChange(e, i)}
-              />
-              <button
-                className="mt-2 px-4 py-1 bg-green-600 text-white rounded text-sm"
-                onClick={() => handleSubmit(i)}
-              >Submit</button>
-              {(submitted[i] || bandScores[i]) && (
-                <div className="text-sm mt-1 text-green-700 border border-red-500 p-2">
-                  ✅ Answer saved! Estimated Band Score: {bandScores[i] || 1}/7<br />
-                  💬 Feedback: {feedback[i]}
+                disabled={submitted[i]}
+              ></textarea>
+              <div className="mt-2 flex gap-4">
+                <button
+                  onClick={() => handleSubmit(i)}
+                  className="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50"
+                  disabled={submitted[i]}
+                >
+                  Submit
+                </button>
+                {submitted[i] && (
+                  <span className="text-blue-600 font-medium">Answer submitted!</span>
+                )}
+              </div>
+              {submitted[i] && study.answers[i] && (
+                <div className="mt-4 text-sm text-gray-700">
+                  <p className="font-semibold">Model Answer:</p>
+                  <p>{study.answers[i]}</p>
                 </div>
               )}
             </div>
           ))}
         </div>
       )}
-
-      <div className="mt-6 space-y-3">
-        {caseStudy.modelAnswer && (
-          <details className="border p-3 rounded">
-            <summary className="cursor-pointer font-semibold text-blue-600">💡 Model Answer</summary>
-            {renderField(caseStudy.modelAnswer)}
-          </details>
-        )}
-
-        {caseStudy.toolkit && (
-          <details className="border p-3 rounded">
-            <summary className="cursor-pointer font-semibold text-yellow-700">🧰 Toolkit</summary>
-            {renderField(caseStudy.toolkit)}
-          </details>
-        )}
-
-        {caseStudy.TOK && (
-          <details className="border p-3 rounded">
-            <summary className="cursor-pointer font-semibold text-purple-700">🧠 TOK Connection</summary>
-            {renderField(caseStudy.TOK)}
-          </details>
-        )}
-
-        {caseStudy.IA && (
-          <details className="border p-3 rounded">
-            <summary className="cursor-pointer font-semibold text-pink-700">📊 IA Idea</summary>
-            {renderField(caseStudy.IA)}
-          </details>
-        )}
-
-        {caseStudy.EE && (
-          <details className="border p-3 rounded">
-            <summary className="cursor-pointer font-semibold text-green-700">📘 EE Exploration</summary>
-            {renderField(caseStudy.EE)}
-          </details>
-        )}
-
-        {caseStudy.resources && (
-          <details className="border p-3 rounded">
-            <summary className="cursor-pointer font-semibold text-gray-700">🔗 Additional Resources</summary>
-            {Array.isArray(caseStudy.resources) ? (
-              <ul className="list-disc ml-5">
-                {caseStudy.resources.map((link, i) => (
-                  <li key={i}><a href={link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{link}</a></li>
-                ))}
-              </ul>
-            ) : (
-              <p className="mt-2 text-blue-600 underline">
-                <a href={caseStudy.resources} target="_blank" rel="noopener noreferrer">View Resource</a>
-              </p>
-            )}
-          </details>
-        )}
-      </div>
     </div>
   );
-};
-
-export default CaseStudyPage;
+}
