@@ -13,7 +13,7 @@ const CaseStudyPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    localStorage.removeItem(`responses-${id}`);
+    localStorage.removeItem (`responses-${id}`);
   }, [id]);
 
   useEffect(() => {
