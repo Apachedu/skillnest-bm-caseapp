@@ -1,22 +1,23 @@
-// src/firebase/firebase.js
+// Import Firebase core and necessary services
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
-// Import Firebase functions
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-
-// Your Firebase config (you already generated this)
+// Your Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyApMfjjyXaeWcjAOdsFcAVYySYGnrCbbAo",
-  authDomain: "skillnestcasestudysim.firebaseapp.com",
-  projectId: "skillnestcasestudysim",
-  storageBucket: "skillnestcasestudysim.appspot.com", // corrected bucket
-  messagingSenderId: "859733761457",
-  appId: "1:859733761457:web:f137f75a1c2b6c8400f190"
+  apiKey: "AIzaSyAifR2QGEN0ZZ3TLDMbPzM2zmWEdZHRS2k",
+  authDomain: "skillnestcasestudysim-d6355.firebaseapp.com",
+  projectId: "skillnestcasestudysim-d6355",
+  storageBucket: "skillnestcasestudysim-d6355.appspot.com",
+  messagingSenderId: "874264746569",
+  appId: "1:874264746569:web:56fb675a374402373d7d98"
 };
 
-// Initialize Firebase app
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Export Firestore instance
+// Export Firestore and Auth
 const db = getFirestore(app);
-export default db;
+const auth = getAuth(app);
+
+export { db as default, auth };

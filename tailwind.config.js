@@ -14,6 +14,9 @@ export default {
         brandGray: '#4B5563',
         'brandGray-light': '#9CA3AF',
         'brandGray-dark': '#1F2937'
+      },
+      fontFamily: {
+        sans: ['Inter', 'ui-sans-serif', 'system-ui']
       }
     }
   },
