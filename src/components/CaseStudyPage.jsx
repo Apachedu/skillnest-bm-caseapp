@@ -65,8 +65,23 @@ const CaseStudyPage = () => {
   };
 
   const handleSubmit = (index) => {
-    const answer = responses[index] || '';
-    let score = Math.min(10, Math.floor(answer.length / 60)); // 600+ chars = 10/10
+    const answer = (responses[index] || '').toLowerCase();
+    let score = 1;
+
+    const keywords = ['leadership', 'delegation', 'structure', 'expansion', 'communication'];
+    const matches = keywords.filter(kw => answer.includes(kw)).length;
+
+    if (answer.length > 400 && matches >= 4) {
+      score = 10;
+    } else if (answer.length > 300 && matches >= 3) {
+      score = 8;
+    } else if (answer.length > 200 && matches >= 2) {
+      score = 6;
+    } else if (answer.length > 100 && matches >= 1) {
+      score = 4;
+    } else {
+      score = 2;
+    }
 
     const band = mapToBand(score);
     const paperType = caseStudy?.paperType || 'Paper 1';
